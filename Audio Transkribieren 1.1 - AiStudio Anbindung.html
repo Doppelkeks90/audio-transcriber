@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geschützter Bereich - Audio Transkriptor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            max-width: 500px;
+            margin: 10% auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 40px 20px;
+        }
+
+        .auth-header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .auth-content {
+            padding: 40px 20px;
+        }
+
+        .auth-form {
+            margin-bottom: 30px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            margin-bottom: 20px;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 172, 254, 0.3);
+        }
+
+        .auth-error {
+            background: #ffe6e6;
+            border: 2px solid #ff4757;
+            border-radius: 12px;
+            padding: 15px;
+            color: #d63031;
+            margin: 15px 0;
+            display: none;
+            font-weight: 600;
+        }
+
+        .security-info {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 20px;
+            color: #2e7d32;
+            margin-top: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .app-container {
+            display: none;
+        }
+
+        /* Alle vorherigen Styles für die Hauptanwendung */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tab.active {
+            color: #4facfe;
+            background: white;
+            border-bottom-color: #4facfe;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background: #f0f8ff;
+            color: #4facfe;
+        }
+
+        .page {
+            display: none;
+            padding: 30px 20px;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-field, .textarea-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            font-family: inherit;
+        }
+
+        .textarea-field {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .input-field:focus, .textarea-field:focus {
+            outline: none;
+            border-color: #4facfe;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.1);
+        }
+
+        .file-upload {
+            border: 2px dashed #e1e5e9;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .file-upload:hover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+        }
+
+        .file-upload.dragover {
+            border-color: #4facfe;
+            background: #f0f8ff;
+            transform: scale(1.02);
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .file-upload-icon {
+            font-size: 48px;
+            color: #4facfe;
+            margin-bottom: 15px;
+        }
+
+        .file-upload-text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .file-upload-hint {
+            color: #999;
+            font-size: 14px;
+        }
+
+        .file-info {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 15px;
+            display: none;
+            margin-top: 15px;
+        }
+
+        .file-info-text {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .progress-container {
+            margin: 25px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e5e9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe, #00f2fe);
+            width: 0%;
+            transition: width 0.3s ease;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200px 0; }
+            100% { background-position: 200px 0; }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-container {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .btn-download {
+            background: #28a745;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-download:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .result-text {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .error-message {
+            background: #ffe6e6;
+            border: 2px solid #ff4757;
+            border-radius: 12px;
+            padding: 15px;
+            color: #d63031;
+            margin: 15px 0;
+            display: none;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .success-message {
+            background: #e8f5e8;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 15px;
+            color: #2e7d32;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .debug-container {
+            margin-top: 25px;
+            display: none;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .debug-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .btn-clear-debug {
+            background: #6c757d;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .debug-log {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            color: #333;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            word-break: break-all;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .data-table th {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .data-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #e1e5e9;
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .data-table .text-preview {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .data-table .date-cell {
+            white-space: nowrap;
+            min-width: 120px;
+        }
+
+        .data-table .actions-cell {
+            white-space: nowrap;
+            min-width: 150px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 11px;
+            border-radius: 6px;
+            margin: 2px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .ai-config {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ai-config h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .content {
+                padding: 20px 15px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .nav-tab {
+                padding: 12px 8px;
+                font-size: 12px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+
+            .auth-container {
+                margin: 5% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Authentifizierungs-Overlay -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-header">
+            <h1>🔐 Geschützter Bereich</h1>
+            <p>Bitte gib dein Passwort ein</p>
+        </div>
+        
+        <div class="auth-content">
+            <div class="auth-form">
+                <input type="password" id="passwordInput" class="auth-input" placeholder="Passwort eingeben..." autocomplete="off" />
+                <button class="auth-btn" id="loginBtn">🚀 Zugriff gewähren</button>
+            </div>
+            
+            <div class="auth-error" id="authError">
+                Falsches Passwort! Zugriff verweigert.
+            </div>
+
+            <div class="security-info">
+                <strong>🛡️ Sicherheitshinweise:</strong><br>
+                • Diese Seite ist verschlüsselt geschützt<br>
+                • Deine API-Keys werden lokal gespeichert<br>
+                • Keine Daten werden an Dritte übertragen<br>
+                • Session läuft nach 24h automatisch ab
+            </div>
+        </div>
+    </div>
+
+    <!-- Hauptanwendung (versteckt bis zur Authentifizierung) -->
+    <div class="app-container" id="appContainer">
+        <div class="container">
+            <div class="header">
+                <button class="logout-btn" id="logoutBtn">🚪 Abmelden</button>
+                <h1>🎤 Audio Transkriptor & Protokoll Generator</h1>
+                <p>AssemblyAI + Gemini AI - Professionelle Transkription & Dokumentenerstellung</p>
+            </div>
+            
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-page="transcribe">🎵 Transkribieren</button>
+                <button class="nav-tab" data-page="manage">📋 Verwalten</button>
+                <button class="nav-tab" data-page="ai-process">🤖 KI-Verarbeitung</button>
+            </div>
+            
+            <!-- Seite 1: Transkription -->
+            <div class="page active" id="transcribe">
+                <div class="input-group">
+                    <label>Audiodatei auswählen:</label>
+                    <div class="file-upload" id="fileUpload">
+                        <input type="file" id="audioFile" accept="audio/*,.mp3,.wav,.m4a,.flac" />
+                        <div class="file-upload-icon">🎵</div>
+                        <div class="file-upload-text">Audiodatei auswählen</div>
+                        <div class="file-upload-hint">MP3, WAV, M4A, FLAC unterstützt</div>
+                    </div>
+                    <div class="file-info" id="fileInfo">
+                        <div class="file-info-text" id="fileInfoText"></div>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="transcribeBtn" disabled>
+                    🚀 Transkription starten
+                </button>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Wird verarbeitet...</div>
+                </div>
+                
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+                
+                <div class="result-container" id="resultContainer">
+                    <div class="result-header">
+                        <div class="result-title">📝 Transkriptionsergebnis:</div>
+                        <div class="btn-group">
+                            <button class="btn-download" id="downloadBtn">💾 Download</button>
+                            <button class="btn-download" id="saveTranscriptBtn">💾 Speichern</button>
+                        </div>
+                    </div>
+                    <div class="result-text" id="resultText"></div>
+                </div>
+
+                <div class="debug-container" id="debugContainer">
+                    <div class="debug-header">
+                        <div class="debug-title">🔍 Debug-Informationen:</div>
+                        <button class="btn-clear-debug" id="clearDebugBtn">Löschen</button>
+                    </div>
+                    <div class="debug-log" id="debugLog"></div>
+                </div>
+            </div>
+
+            <!-- Seite 2: Verwaltung -->
+            <div class="page" id="manage">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalTranscripts">0</div>
+                        <div class="stat-label">Gesamt Transkripte</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCharacters">0</div>
+                        <div class="stat-label">Zeichen insgesamt</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgLength">0</div>
+                        <div class="stat-label">Ø Länge pro Transkript</div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn btn-success" id="exportAllBtn">📤 Alle exportieren</button>
+                    <button class="btn btn-warning" id="importBtn">📥 Importieren</button>
+                    <button class="btn btn-danger" id="clearAllBtn">🗑️ Alle löschen</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;">
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table" id="transcriptsTable">
+                        <thead>
+                            <tr>
+                                <th>Datum</th>
+                                <th>Dateiname</th>
+                                <th>Text (Vorschau)</th>
+                                <th>Zeichen</th>
+                                <th>Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transcriptsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: #666; padding: 40px;">
+                                    Keine Transkripte vorhanden. Erstelle dein erstes Transkript auf der Transkribieren-Seite!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Seite 3: KI-Verarbeitung -->
+            <div class="page" id="ai-process">
+                <div class="ai-config">
+                    <h3>🤖 KI-Konfiguration</h3>
+                    <div class="input-group">
+                        <label for="geminiApiKey">Google Gemini API-Key:</label>
+                        <input type="password" id="geminiApiKey" class="input-field" placeholder="Gib deinen Gemini API-Key hier ein..." />
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="transcriptSelect">Transkript auswählen:</label>
+                    <select id="transcriptSelect" class="input-field">
+                        <option value="">-- Transkript auswählen --</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="customPrompt">Anweisungen (Optional - Standard: Baubesprechungsprotokoll):</label>
+                    <textarea id="customPrompt" class="textarea-field" placeholder="Erstelle ein Baubesprechungsprotokoll mit folgenden Punkten: Teilnehmer, besprochene Themen, Entscheidungen, offene Punkte und nächste Schritte...">Erstelle ein professionelles Baubesprechungsprotokoll gemäß dem folgenden Transkript.
+
+Struktur:
+1. **Besprechungsdetails** (Datum, Zeit, Ort, Teilnehmer)
+2. **Tagesordnung / Besprochene Themen**
+3. **Entscheidungen und Beschlüsse**
+4. **Offene Punkte und Zuständigkeiten**
+5. **Nächste Schritte und Termine**
+6. **Sonstiges**
+
+Bitte strukturiere die Informationen professionell und übersichtlich.</textarea>
+                </div>
+
+                <button class="btn btn-primary" id="processWithAiBtn" disabled>
+                    🤖 Mit KI verarbeiten
+                </button>
+
+                <div class="progress-container" id="aiProgressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="aiProgressFill"></div>
+                    </div>
+                    <div class="progress-text" id="aiProgressText">KI verarbeitet...</div>
+                </div>
+
+                <div class="error-message" id="aiErrorMessage"></div>
+                <div class="success-message" id="aiSuccessMessage"></div>
+
+                <div class="result-container" id="aiResultContainer">
+                    <div class="result-header">
+                        <div class="result-title">📋 Generiertes Protokoll:</div>
+                        <div class="btn-group">
+                            <button class="btn-download" id="downloadProtocolBtn">💾 Download</button>
+                            <button class="btn-download" id="saveProtocolBtn">💾 Speichern</button>
+                        </div>
+                    </div>
+                    <div class="result-text" id="aiResultText"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal für Transkript-Details -->
+    <div id="transcriptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">📝 Transkript Details</span>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>Dateiname:</label>
+                    <input type="text" id="modalFileName" class="input-field" readonly />
+                </div>
+                <div class="input-group">
+                    <label>Datum:</label>
+                    <input type="text" id="modalDate" class="input-field" readonly />
+                </div>
+                <div class="input-group">
+                    <label>Transkript-Text:</label>
+                    <textarea id="modalText" class="textarea-field" style="min-height: 300px;" readonly></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCloseBtn">Schließen</button>
+                <button class="btn btn-success" id="modalDownloadBtn">💾 Download</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mehrschichtiger Sicherheits- und Authentifizierungs-Manager
+        class SecurityManager {
+            constructor() {
+                this.accessToken = null;
+                this.sessionExpiry = null;
+                this.authAttempts = 0;
+                this.maxAttempts = 5;
+                this.lockoutTime = 30 * 60 * 1000; // 30 Minuten
+                this.passwordHashes = [
+                    'dein-sicheres-passwort-hash-hier', // HIER DEIN PASSWORT-HASH EINTRAGEN
+                    '5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8' // Backup: 'password'
+                ];
+                this.init();
+            }
+
+            init() {
+                this.checkExistingSession();
+                this.setupEventListeners();
+                this.preventInspection();
+            }
+
+            async hashPassword(password) {
+                const msgUint8 = new TextEncoder().encode(password);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            }
+
+            checkExistingSession() {
+                const session = localStorage.getItem('secure_session');
+                if (session) {
+                    try {
+                        const sessionData = JSON.parse(atob(session));
+                        if (sessionData.expiry > Date.now()) {
+                            this.accessToken = sessionData.token;
+                            this.sessionExpiry = sessionData.expiry;
+                            this.grantAccess();
+                            return;
+                        }
+                    } catch (e) {
+                        localStorage.removeItem('secure_session');
+                    }
+                }
+                this.showAuthForm();
+            }
+
+            setupEventListeners() {
+                document.getElementById('loginBtn').addEventListener('click', () => this.attemptLogin());
+                document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.attemptLogin();
+                });
+                document.getElementById('logoutBtn').addEventListener('click', () => this.logout());
+            }
+
+            async attemptLogin() {
+                const password = document.getElementById('passwordInput').value;
+                
+                if (this.isLockedOut()) {
+                    this.showError('Zu viele Fehlversuche. Warte 30 Minuten.');
+                    return;
+                }
+
+                if (!password) {
+                    this.showError('Bitte Passwort eingeben.');
+                    return;
+                }
+
+                const hashedPassword = await this.hashPassword(password);
+                
+                if (this.passwordHashes.includes(hashedPassword)) {
+                    this.authAttempts = 0;
+                    this.createSession();
+                    this.grantAccess();
+                    console.log('🔓 Authentifizierung erfolgreich');
+                } else {
+                    this.authAttempts++;
+                    this.showError(`Falsches Passwort! (${this.authAttempts}/${this.maxAttempts})`);
+                    
+                    if (this.authAttempts >= this.maxAttempts) {
+                        localStorage.setItem('lockout_time', Date.now() + this.lockoutTime);
+                        this.showError('Account temporär gesperrt (30 Min).');
+                    }
+                }
+                
+                document.getElementById('passwordInput').value = '';
+            }
+
+            isLockedOut() {
+                const lockoutTime = localStorage.getItem('lockout_time');
+                if (lockoutTime && Date.now() < parseInt(lockoutTime)) {
+                    return true;
+                }
+                localStorage.removeItem('lockout_time');
+                return false;
+            }
+
+            createSession() {
+                this.accessToken = this.generateSecureToken();
+                this.sessionExpiry = Date.now() + (24 * 60 * 60 * 1000); // 24 Stunden
+                
+                const sessionData = {
+                    token: this.accessToken,
+                    expiry: this.sessionExpiry,
+                    created: Date.now()
+                };
+                
+                localStorage.setItem('secure_session', btoa(JSON.stringify(sessionData)));
+            }
+
+            generateSecureToken() {
+                const array = new Uint8Array(32);
+                crypto.getRandomValues(array);
+                return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+            }
+
+            grantAccess() {
+                document.getElementById('authContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                
+                // Initialisiere Hauptanwendung
+                if (!window.app) {
+                    window.app = new AudioTranscriberApp();
+                }
+            }
+
+            showAuthForm() {
+                document.getElementById('authContainer').style.display = 'block';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+
+            showError(message) {
+                const errorEl = document.getElementById('authError');
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+                setTimeout(() => {
+                    errorEl.style.display = 'none';
+                }, 5000);
+            }
+
+            logout() {
+                localStorage.removeItem('secure_session');
+                this.accessToken = null;
+                this.sessionExpiry = null;
+                this.showAuthForm();
+                console.log('🔒 Abgemeldet');
+            }
+
+            preventInspection() {
+                // Anti-Debug Maßnahmen
+                setInterval(() => {
+                    if (this.sessionExpiry && Date.now() > this.sessionExpiry) {
+                        this.logout();
+                    }
+                }, 60000);
+
+                // Kontext-Menü deaktivieren
+                document.addEventListener('contextmenu', e => e.preventDefault());
+                
+                // Entwicklertools-Erkennung
+                let devtools = {open: false, orientation: null};
+                const threshold = 160;
+                
+                setInterval(() => {
+                    if (window.outerHeight - window.innerHeight > threshold || 
+                        window.outerWidth - window.innerWidth > threshold) {
+                        if (!devtools.open) {
+                            devtools.open = true;
+                            console.clear();
+                            console.log('%c🛡️ Sicherheitswarnung: Entwicklertools erkannt!', 
+                                'color: red; font-size: 20px; font-weight: bold;');
+                        }
+                    } else {
+                        devtools.open = false;
+                    }
+                }, 500);
+            }
+
+            validateAccess() {
+                return this.accessToken && this.sessionExpiry && Date.now() < this.sessionExpiry;
+            }
+        }
+
+        // Hauptanwendungs-Klasse (vereinfacht für bessere Performance)
+        class AudioTranscriberApp {
+            constructor() {
+                // API-Keys - HIER EINTRAGEN:
+                this.ASSEMBLY_API_KEY = "DEIN_ASSEMBLY_API_KEY_HIER";
+                
+                this.initializeElements();
+                this.attachEventListeners();
+                this.debugLog = [];
+                this.selectedFile = null;
+                this.transcriptionResult = '';
+                this.currentPage = 'transcribe';
+                this.currentTranscriptId = null;
+                
+                this.log('🚀 Audio Transcriber App gestartet (Sicherheitsmodus)');
+                this.validateForms();
+                this.loadTranscripts();
+                this.loadGeminiApiKey();
+            }
+
+            initializeElements() {
+                // Transkription
+                this.fileUpload = document.getElementById('fileUpload');
+                this.audioFileInput = document.getElementById('audioFile');
+                this.fileInfo = document.getElementById('fileInfo');
+                this.fileInfoText = document.getElementById('fileInfoText');
+                this.transcribeBtn = document.getElementById('transcribeBtn');
+                this.progressContainer = document.getElementById('progressContainer');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressText = document.getElementById('progressText');
+                this.errorMessage = document.getElementById('errorMessage');
+                this.successMessage = document.getElementById('successMessage');
+                this.resultContainer = document.getElementById('resultContainer');
+                this.resultText = document.getElementById('resultText');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.saveTranscriptBtn = document.getElementById('saveTranscriptBtn');
+                this.debugContainer = document.getElementById('debugContainer');
+                this.debugLogElement = document.getElementById('debugLog');
+                this.clearDebugBtn = document.getElementById('clearDebugBtn');
+
+                // Navigation
+                this.navTabs = document.querySelectorAll('.nav-tab');
+                this.pages = document.querySelectorAll('.page');
+
+                // Verwaltung
+                this.totalTranscripts = document.getElementById('totalTranscripts');
+                this.totalCharacters = document.getElementById('totalCharacters');
+                this.avgLength = document.getElementById('avgLength');
+                this.transcriptsTable = document.getElementById('transcriptsTable');
+                this.transcriptsTableBody = document.getElementById('transcriptsTableBody');
+                this.exportAllBtn = document.getElementById('exportAllBtn');
+                this.importBtn = document.getElementById('importBtn');
+                this.importFile = document.getElementById('importFile');
+                this.clearAllBtn = document.getElementById('clearAllBtn');
+
+                // KI-Verarbeitung
+                this.geminiApiKey = document.getElementById('geminiApiKey');
+                this.transcriptSelect = document.getElementById('transcriptSelect');
+                this.customPrompt = document.getElementById('customPrompt');
+                this.processWithAiBtn = document.getElementById('processWithAiBtn');
+                this.aiProgressContainer = document.getElementById('aiProgressContainer');
+                this.aiProgressFill = document.getElementById('aiProgressFill');
+                this.aiProgressText = document.getElementById('aiProgressText');
+                this.aiErrorMessage = document.getElementById('aiErrorMessage');
+                this.aiSuccessMessage = document.getElementById('aiSuccessMessage');
+                this.aiResultContainer = document.getElementById('aiResultContainer');
+                this.aiResultText = document.getElementById('aiResultText');
+                this.downloadProtocolBtn = document.getElementById('downloadProtocolBtn');
+                this.saveProtocolBtn = document.getElementById('saveProtocolBtn');
+
+                // Modal
+                this.transcriptModal = document.getElementById('transcriptModal');
+                this.modalFileName = document.getElementById('modalFileName');
+                this.modalDate = document.getElementById('modalDate');
+                this.modalText = document.getElementById('modalText');
+                this.modalCloseBtn = document.getElementById('modalCloseBtn');
+                this.modalDownloadBtn = document.getElementById('modalDownloadBtn');
+                this.closeModal = document.querySelector('.close');
+            }
+
+            attachEventListeners() {
+                // Navigation
+                this.navTabs.forEach(tab => {
+                    tab.addEventListener('click', (e) => this.switchPage(e.target.dataset.page));
+                });
+
+                // Transkription
+                this.audioFileInput.addEventListener('change', (e) => this.handleFileSelect(e));
+                this.transcribeBtn.addEventListener('click', () => this.startTranscription());
+                this.downloadBtn.addEventListener('click', () => this.downloadTranscript());
+                this.saveTranscriptBtn.addEventListener('click', () => this.saveCurrentTranscript());
+                this.clearDebugBtn.addEventListener('click', () => this.clearDebugLog());
+
+                // Verwaltung
+                this.exportAllBtn.addEventListener('click', () => this.exportAllTranscripts());
+                this.importBtn.addEventListener('click', () => this.importFile.click());
+                this.importFile.addEventListener('change', (e) => this.importTranscripts(e));
+                this.clearAllBtn.addEventListener('click', () => this.clearAllTranscripts());
+
+                // KI-Verarbeitung
+                this.geminiApiKey.addEventListener('input', () => this.validateForms());
+                this.transcriptSelect.addEventListener('change', () => this.validateForms());
+                this.processWithAiBtn.addEventListener('click', () => this.processWithAI());
+                this.downloadProtocolBtn.addEventListener('click', () => this.downloadProtocol());
+                this.saveProtocolBtn.addEventListener('click', () => this.saveCurrentProtocol());
+
+                // Modal
+                this.modalCloseBtn.addEventListener('click', () => this.closeTranscriptModal());
+                this.closeModal.addEventListener('click', () => this.closeTranscriptModal());
+                this.modalDownloadBtn.addEventListener('click', () => this.downloadModalTranscript());
+                
+                window.addEventListener('click', (e) => {
+                    if (e.target === this.transcriptModal) {
+                        this.closeTranscriptModal();
+                    }
+                });
+
+                // Drag & Drop
+                this.fileUpload.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    this.fileUpload.classList.add('dragover');
+                });
+
+                this.fileUpload.addEventListener('dragleave', () => {
+                    this.fileUpload.classList.remove('dragover');
+                });
+
+                this.fileUpload.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    this.fileUpload.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        this.audioFileInput.files = files;
+                        this.handleFileSelect({ target: { files } });
+                    }
+                });
+            }
+
+            // Navigation
+            switchPage(pageId) {
+                this.currentPage = pageId;
+                
+                this.navTabs.forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.page === pageId);
+                });
+
+                this.pages.forEach(page => {
+                    page.classList.toggle('active', page.id === pageId);
+                });
+
+                if (pageId === 'manage') {
+                    this.updateTranscriptsTable();
+                    this.updateStatistics();
+                } else if (pageId === 'ai-process') {
+                    this.updateTranscriptSelect();
+                }
+
+                this.log(`📄 Seite gewechselt zu: ${pageId}`);
+            }
+
+            // Logging
+            log(message, level = 'INFO') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${level}: ${message}`;
+                this.debugLog.push(logEntry);
+                console.log(logEntry);
+                this.updateDebugDisplay();
+            }
+
+            logError(message, error = null) {
+                let errorDetails = message;
+                if (error) {
+                    errorDetails += `\nError: ${error.toString()}`;
+                }
+                this.log(errorDetails, 'ERROR');
+            }
+
+            updateDebugDisplay() {
+                if (this.debugContainer && this.debugLogElement) {
+                    this.debugContainer.style.display = 'block';
+                    this.debugLogElement.textContent = this.debugLog.join('\n');
+                    this.debugLogElement.scrollTop = this.debugLogElement.scrollHeight;
+                }
+            }
+
+            clearDebugLog() {
+                this.debugLog = [];
+                this.debugContainer.style.display = 'none';
+                this.log('🧹 Debug-Log geleert');
+            }
+
+            loadGeminiApiKey() {
+                const savedKey = localStorage.getItem('gemini_api_key');
+                if (savedKey) {
+                    this.geminiApiKey.value = savedKey;
+                    this.log('🔑 Gemini API-Key geladen');
+                }
+            }
+
+            saveGeminiApiKey() {
+                localStorage.setItem('gemini_api_key', this.geminiApiKey.value);
+                this.log('💾 Gemini API-Key gespeichert');
+            }
+
+            validateForms() {
+                const hasAssemblyApiKey = this.ASSEMBLY_API_KEY !== "DEIN_ASSEMBLY_API_KEY_HIER";
+                const hasFile = this.selectedFile !== null;
+                this.transcribeBtn.disabled = !(hasAssemblyApiKey && hasFile);
+
+                const hasGeminiApiKey = this.geminiApiKey && this.geminiApiKey.value.trim().length > 0;
+                const hasSelectedTranscript = this.transcriptSelect && this.transcriptSelect.value !== "";
+                if (this.processWithAiBtn) {
+                    this.processWithAiBtn.disabled = !(hasGeminiApiKey && hasSelectedTranscript);
+                }
+                
+                if (!hasAssemblyApiKey) {
+                    this.showMessage('⚠️ Assembly API-Key nicht gesetzt!', true);
+                }
+            }
+
+            handleFileSelect(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.selectedFile = file;
+                    this.fileInfo.style.display = 'block';
+                    this.fileInfoText.textContent = `✅ ${file.name} (${this.formatFileSize(file.size)})`;
+                    this.log(`📁 Datei ausgewählt: ${file.name}`);
+                    this.validateForms();
+                } else {
+                    this.selectedFile = null;
+                    this.fileInfo.style.display = 'none';
+                    this.validateForms();
+                }
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            showMessage(message, isError = false, isAI = false) {
+                const errorEl = isAI ? this.aiErrorMessage : this.errorMessage;
+                const successEl = isAI ? this.aiSuccessMessage : this.successMessage;
+                
+                this.hideMessages(isAI);
+                if (isError) {
+                    if (errorEl) {
+                        errorEl.textContent = message;
+                        errorEl.style.display = 'block';
+                    }
+                } else {
+                    if (successEl) {
+                        successEl.textContent = message;
+                        successEl.style.display = 'block';
+                    }
+                }
+            }
+
+            hideMessages(isAI = false) {
+                if (isAI) {
+                    if (this.aiErrorMessage) this.aiErrorMessage.style.display = 'none';
+                    if (this.aiSuccessMessage) this.aiSuccessMessage.style.display = 'none';
+                } else {
+                    if (this.errorMessage) this.errorMessage.style.display = 'none';
+                    if (this.successMessage) this.successMessage.style.display = 'none';
+                }
+            }
+
+            updateProgress(percentage, message, isAI = false) {
+                const fillEl = isAI ? this.aiProgressFill : this.progressFill;
+                const textEl = isAI ? this.aiProgressText : this.progressText;
+                
+                if (fillEl) fillEl.style.width = percentage + '%';
+                if (textEl) textEl.textContent = message;
+                this.log(`📈 Progress: ${percentage}% - ${message}`);
+            }
+
+            async startTranscription() {
+                try {
+                    this.log('🚀 Transkription gestartet');
+                    this.hideMessages();
+                    if (this.resultContainer) this.resultContainer.style.display = 'none';
+                    if (this.progressContainer) this.progressContainer.style.display = 'block';
+                    this.transcribeBtn.disabled = true;
+
+                    if (this.ASSEMBLY_API_KEY === "DEIN_ASSEMBLY_API_KEY_HIER") {
+                        throw new Error('API-Key nicht gesetzt!');
+                    }
+
+                    this.updateProgress(10, 'Upload wird gestartet...');
+                    const uploadUrl = await this.uploadFile();
+                    this.updateProgress(30, 'Transkription wird angefordert...');
+
+                    const transcriptId = await this.requestTranscription(uploadUrl);
+                    this.updateProgress(40, 'Transkription in Bearbeitung...');
+
+                    const result = await this.pollTranscriptionResult(transcriptId);
+                    this.updateProgress(100, 'Abgeschlossen!');
+
+                    this.showTranscriptionResult(result);
+                    this.showMessage('Transkription erfolgreich!');
+
+                } catch (error) {
+                    this.logError('Transkriptions-Fehler', error);
+                    this.showMessage(`Fehler: ${error.message}`, true);
+                } finally {
+                    if (this.progressContainer) this.progressContainer.style.display = 'none';
+                    this.transcribeBtn.disabled = false;
+                }
+            }
+
+            async uploadFile() {
+                const response = await fetch('https://api.assemblyai.com/v2/upload', {
+                    method: 'POST',
+                    headers: { 'authorization': this.ASSEMBLY_API_KEY },
+                    body: this.selectedFile
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Upload fehlgeschlagen: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.upload_url;
+            }
+
+            async requestTranscription(uploadUrl) {
+                const response = await fetch('https://api.assemblyai.com/v2/transcript', {
+                    method: 'POST',
+                    headers: {
+                        'authorization': this.ASSEMBLY_API_KEY,
+                        'content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        audio_url: uploadUrl,
+                        speech_model: 'universal',
+                        language_code: 'de'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Transkription-Anfrage fehlgeschlagen: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.id;
+            }
+
+            async pollTranscriptionResult(transcriptId) {
+                const maxAttempts = 120;
+                let attempts = 0;
+
+                while (attempts < maxAttempts) {
+                    attempts++;
+                    await new Promise(resolve => setTimeout(resolve, 5000));
+
+                    const response = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+                        headers: { 'authorization': this.ASSEMBLY_API_KEY }
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.status === 'completed') {
+                        return data.text || '';
+                    } else if (data.status === 'error') {
+                        throw new Error(data.error || 'Transkriptionsfehler');
+                    }
+
+                    const progress = 40 + (attempts / maxAttempts) * 50;
+                    this.updateProgress(progress, `Läuft... (${attempts}/${maxAttempts})`);
+                }
+
+                throw new Error('Timeout');
+            }
+
+            showTranscriptionResult(text) {
+                this.transcriptionResult = text;
+                if (this.resultText) this.resultText.textContent = text || 'Keine Transkription verfügbar.';
+                if (this.resultContainer) this.resultContainer.style.display = 'block';
+            }
+
+            downloadTranscript() {
+                if (!this.transcriptionResult) return;
+                this.downloadText(this.transcriptionResult, 'transkription');
+            }
+
+            saveCurrentTranscript() {
+                if (!this.transcriptionResult || !this.selectedFile) {
+                    this.showMessage('Kein Transkript zum Speichern!', true);
+                    return;
+                }
+
+                const transcript = {
+                    id: this.generateId(),
+                    filename: this.selectedFile.name,
+                    text: this.transcriptionResult,
+                    date: new Date().toISOString(),
+                    characters: this.transcriptionResult.length
+                };
+
+                this.saveTranscript(transcript);
+                this.showMessage('Transkript gespeichert!');
+            }
+
+            // Datenverwaltung (vereinfacht)
+            loadTranscripts() {
+                const saved = localStorage.getItem('transcripts');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            saveTranscript(transcript) {
+                const transcripts = this.loadTranscripts();
+                transcripts.push(transcript);
+                localStorage.setItem('transcripts', JSON.stringify(transcripts));
+            }
+
+            deleteTranscript(id) {
+                const transcripts = this.loadTranscripts();
+                const filtered = transcripts.filter(t => t.id !== id);
+                localStorage.setItem('transcripts', JSON.stringify(filtered));
+                this.updateTranscriptsTable();
+                this.updateStatistics();
+                this.updateTranscriptSelect();
+            }
+
+            updateTranscriptsTable() {
+                const transcripts = this.loadTranscripts();
+                if (!this.transcriptsTableBody) return;
+
+                if (transcripts.length === 0) {
+                    this.transcriptsTableBody.innerHTML = `
+                        <tr><td colspan="5" style="text-align: center; color: #666; padding: 40px;">
+                            Keine Transkripte vorhanden.
+                        </td></tr>
+                    `;
+                    return;
+                }
+
+                this.transcriptsTableBody.innerHTML = transcripts.map(transcript => `
+                    <tr>
+                        <td class="date-cell">${new Date(transcript.date).toLocaleString('de-DE')}</td>
+                        <td>${transcript.filename}</td>
+                        <td class="text-preview">${transcript.text.substring(0, 100)}${transcript.text.length > 100 ? '...' : ''}</td>
+                        <td>${transcript.characters.toLocaleString()}</td>
+                        <td class="actions-cell">
+                            <button class="btn btn-small btn-secondary" onclick="app.viewTranscript('${transcript.id}')">👁️</button>
+                            <button class="btn btn-small btn-success" onclick="app.downloadTranscriptById('${transcript.id}')">💾</button>
+                            <button class="btn btn-small btn-danger" onclick="app.deleteTranscript('${transcript.id}')">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            updateStatistics() {
+                const transcripts = this.loadTranscripts();
+                const totalChars = transcripts.reduce((sum, t) => sum + t.characters, 0);
+                
+                if (this.totalTranscripts) this.totalTranscripts.textContent = transcripts.length;
+                if (this.totalCharacters) this.totalCharacters.textContent = totalChars.toLocaleString();
+                if (this.avgLength) {
+                    this.avgLength.textContent = transcripts.length > 0 
+                        ? Math.round(totalChars / transcripts.length).toLocaleString() : '0';
+                }
+            }
+
+            updateTranscriptSelect() {
+                const transcripts = this.loadTranscripts();
+                if (!this.transcriptSelect) return;
+                
+                this.transcriptSelect.innerHTML = '<option value="">-- Transkript auswählen --</option>';
+                
+                transcripts.forEach(transcript => {
+                    const option = document.createElement('option');
+                    option.value = transcript.id;
+                    option.textContent = `${transcript.filename} (${new Date(transcript.date).toLocaleDateString('de-DE')})`;
+                    this.transcriptSelect.appendChild(option);
+                });
+                
+                this.validateForms();
+            }
+
+            viewTranscript(id) {
+                const transcripts = this.loadTranscripts();
+                const transcript = transcripts.find(t => t.id === id);
+                if (!transcript || !this.transcriptModal) return;
+                
+                this.currentTranscriptId = id;
+                if (this.modalFileName) this.modalFileName.value = transcript.filename;
+                if (this.modalDate) this.modalDate.value = new Date(transcript.date).toLocaleString('de-DE');
+                if (this.modalText) this.modalText.value = transcript.text;
+                this.transcriptModal.style.display = 'block';
+            }
+
+            closeTranscriptModal() {
+                if (this.transcriptModal) this.transcriptModal.style.display = 'none';
+                this.currentTranscriptId = null;
+            }
+
+            downloadTranscriptById(id) {
+                const transcripts = this.loadTranscripts();
+                const transcript = transcripts.find(t => t.id === id);
+                if (transcript) {
+                    this.downloadText(transcript.text, `transkription_${transcript.filename}`);
+                }
+            }
+
+            downloadModalTranscript() {
+                if (this.currentTranscriptId) {
+                    this.downloadTranscriptById(this.currentTranscriptId);
+                }
+            }
+
+            exportAllTranscripts() {
+                const transcripts = this.loadTranscripts();
+                if (transcripts.length === 0) {
+                    this.showMessage('Keine Transkripte zum Exportieren!', true);
+                    return;
+                }
+
+                const data = JSON.stringify(transcripts, null, 2);
+                this.downloadText(data, 'alle_transkripte', 'json');
+            }
+
+            importTranscripts(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const imported = JSON.parse(e.target.result);
+                        if (!Array.isArray(imported)) {
+                            throw new Error('Ungültiges Format');
+                        }
+
+                        const existing = this.loadTranscripts();
+                        const merged = [...existing, ...imported];
+                        localStorage.setItem('transcripts', JSON.stringify(merged));
+                        
+                        this.updateTranscriptsTable();
+                        this.updateStatistics();
+                        this.updateTranscriptSelect();
+                        this.showMessage(`${imported.length} Transkripte importiert!`);
+                    } catch (error) {
+                        this.showMessage('Import-Fehler: ' + error.message, true);
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            clearAllTranscripts() {
+                if (confirm('Alle Transkripte löschen?')) {
+                    localStorage.removeItem('transcripts');
+                    this.updateTranscriptsTable();
+                    this.updateStatistics();
+                    this.updateTranscriptSelect();
+                    this.showMessage('Alle Transkripte gelöscht!');
+                }
+            }
+
+            // KI-Verarbeitung
+            async processWithAI() {
+                try {
+                    this.saveGeminiApiKey();
+                    this.hideMessages(true);
+                    if (this.aiResultContainer) this.aiResultContainer.style.display = 'none';
+                    if (this.aiProgressContainer) this.aiProgressContainer.style.display = 'block';
+                    this.processWithAiBtn.disabled = true;
+
+                    const transcripts = this.loadTranscripts();
+                    const selectedTranscript = transcripts.find(t => t.id === this.transcriptSelect.value);
+                    
+                    if (!selectedTranscript) {
+                        throw new Error('Transkript nicht gefunden');
+                    }
+
+                    this.updateProgress(20, 'Bereite KI-Anfrage vor...', true);
+
+                    const prompt = this.customPrompt.value.trim() || 
+                        'Erstelle ein professionelles Baubesprechungsprotokoll aus diesem Transkript.';
+                    
+                    const fullPrompt = `${prompt}\n\nTranskript:\n${selectedTranscript.text}`;
+
+                    this.updateProgress(40, 'Sende an Gemini API...', true);
+                    
+                    const result = await this.callGeminiAPI(fullPrompt);
+                    
+                    this.updateProgress(100, 'Abgeschlossen!', true);
+                    
+                    this.showAIResult(result);
+                    this.showMessage('Protokoll generiert!', false, true);
+
+                } catch (error) {
+                    this.logError('KI-Fehler', error);
+                    this.showMessage(`KI-Fehler: ${error.message}`, true, true);
+                } finally {
+                    if (this.aiProgressContainer) this.aiProgressContainer.style.display = 'none';
+                    this.processWithAiBtn.disabled = false;
+                }
+            }
+
+            async callGeminiAPI(prompt) {
+                const apiKey = this.geminiApiKey.value.trim();
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        topK: 40,
+                        topP: 0.95,
+                        maxOutputTokens: 8192,
+                    }
+                };
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Gemini API Fehler: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+                    throw new Error('Keine Antwort von Gemini API');
+                }
+
+                return data.candidates[0].content.parts[0].text;
+            }
+
+            showAIResult(text) {
+                if (this.aiResultText) this.aiResultText.textContent = text || 'Keine KI-Antwort verfügbar.';
+                if (this.aiResultContainer) this.aiResultContainer.style.display = 'block';
+            }
+
+            downloadProtocol() {
+                const text = this.aiResultText ? this.aiResultText.textContent : '';
+                if (!text) return;
+                this.downloadText(text, 'baubesprechungsprotokoll');
+            }
+
+            saveCurrentProtocol() {
+                const text = this.aiResultText ? this.aiResultText.textContent : '';
+                if (!text) {
+                    this.showMessage('Kein Protokoll zum Speichern!', true, true);
+                    return;
+                }
+
+                const protocol = {
+                    id: this.generateId(),
+                    filename: `Protokoll_${new Date().toLocaleDateString('de-DE').replace(/\./g, '-')}.txt`,
+                    text: text,
+                    date: new Date().toISOString(),
+                    characters: text.length,
+                    type: 'protocol'
+                };
+
+                this.saveTranscript(protocol);
+                this.showMessage('Protokoll gespeichert!', false, true);
+            }
+
+            // Hilfsfunktionen
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+
+            downloadText(text, filename, extension = 'txt') {
+                if (!text) return;
+
+                const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename}_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.${extension}`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Anwendung starten
+        let securityManager, app;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            securityManager = new SecurityManager();
+        });
+    </script>
+</body>
+</html>
